@@ -44,7 +44,22 @@ client.connect(err => {
     .then(result => {
       res.send(result.insertedCount > 0);
     })
+  })
 
+  app.post('/addAdmin', (req, res) => {
+    const email = req.query.email;
+    adminCollection.insertOne({email})
+    .then(result => {
+      res.send(result.insertedCount > 0);
+    })
+  })
+
+  app.post('/isAdmin', (req, res) => {
+    const email = req.query.email;
+    adminCollection.find({email: email})
+    .toArray((err, documents) => {
+      res.send(documents.length > 0);
+    })
   })
 });
 
