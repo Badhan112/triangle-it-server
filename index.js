@@ -98,6 +98,15 @@ client.connect(err => {
     reviewCollection.find({})
     .toArray((err, documents) => res.send(documents));
   })
+
+  app.post('/changeBookingStatus', (req, res) => {
+    const status = req.body.status;
+    const id = req.body.id;
+    bookingCollection.updateOne(
+      {_id: ObjectId(id)},
+      { $set: {status: status}}
+    ).then(result => res.send(result.modifiedCount > 0))
+  })
   
 });
 
