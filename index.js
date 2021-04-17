@@ -19,6 +19,7 @@ app.get('/', (req, res) => {
 client.connect(err => {
   const adminCollection = client.db(process.env.DB_NAME).collection("admins");
   const serviceCollection = client.db(process.env.DB_NAME).collection("services");
+  const bookingCollection = client.db(process.env.DB_NAME).collection("bookings");
   console.log('MongoDB Connected');
 
   app.get('/services', (req, res) => {
@@ -61,6 +62,12 @@ client.connect(err => {
       res.send(documents.length > 0);
     })
   })
+
+  app.post('/addBooking', (req, res) => {
+    bookingCollection.insertOne(req.body)
+    .then(result => res.send(result.insertedCount > 0));
+  })
+  
 });
 
 
