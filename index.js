@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const MongoClient = require('mongodb').MongoClient;
+const ObjectId = require('mongodb').ObjectId;
 const fileUpload = require('express-fileupload');
 const app = express();
 const port = 5000;
@@ -20,6 +21,7 @@ client.connect(err => {
   const adminCollection = client.db(process.env.DB_NAME).collection("admins");
   const serviceCollection = client.db(process.env.DB_NAME).collection("services");
   const bookingCollection = client.db(process.env.DB_NAME).collection("bookings");
+  const reviewCollection = client.db(process.env.DB_NAME).collection("reviews");
   console.log('MongoDB Connected');
 
   app.get('/services', (req, res) => {
@@ -66,6 +68,35 @@ client.connect(err => {
   app.post('/addBooking', (req, res) => {
     bookingCollection.insertOne(req.body)
     .then(result => res.send(result.insertedCount > 0));
+  })
+
+  app.post('/allBooking', (req, res) => {
+    const email = req.body.email;
+    adminCollection.find({email: email})
+    .toArray((err, admins) => {
+      if(admins.length > 0){
+        bookingCollection.find({})
+        .toArray((err, documents) => res.send(documents));
+      } else {
+        bookingCollection.find({email: email})
+        .toArray((err, documents) => res.send(documents));
+      }
+    })
+  })
+
+  app.get('/services/:id', (req, res) => {
+    serviceCollection.findOne({ _id: ObjectId(req.params.id)})
+    .then(document => res.send(document));
+  })
+
+  app.post('/addReview', (req, res) => {
+    reviewCollection.insertOne(req.body)
+    .then(result => res.send(result.insertedCount > 0));
+  })
+
+  app.get('/allReviews', (req, res) => {
+    reviewCollection.find({})
+    .toArray((err, documents) => res.send(documents));
   })
   
 });
