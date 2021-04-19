@@ -26,7 +26,7 @@ client.connect(err => {
 
   app.get('/services', (req, res) => {
     serviceCollection.find({})
-    .toArray((err, documents) => res.send(documents));
+      .toArray((err, documents) => res.send(documents));
   })
 
   app.post('/addService', (req, res) => {
@@ -43,74 +43,95 @@ client.connect(err => {
       img: Buffer.from(encImg, 'base64'),
     }
 
-    serviceCollection.insertOne({title, price, description, image})
-    .then(result => {
-      res.send(result.insertedCount > 0);
-    })
+    serviceCollection.insertOne({ title, price, description, image })
+      .then(result => {
+        res.send(result.insertedCount > 0);
+      })
   })
 
   app.post('/addAdmin', (req, res) => {
     const email = req.query.email;
-    adminCollection.insertOne({email})
-    .then(result => {
-      res.send(result.insertedCount > 0);
-    })
+    adminCollection.insertOne({ email })
+      .then(result => {
+        res.send(result.insertedCount > 0);
+      })
   })
 
   app.post('/isAdmin', (req, res) => {
     const email = req.query.email;
-    adminCollection.find({email: email})
-    .toArray((err, documents) => {
-      res.send(documents.length > 0);
-    })
+    adminCollection.find({ email: email })
+      .toArray((err, documents) => {
+        res.send(documents.length > 0);
+      })
   })
 
   app.post('/addBooking', (req, res) => {
     bookingCollection.insertOne(req.body)
-    .then(result => res.send(result.insertedCount > 0));
+      .then(result => res.send(result.insertedCount > 0));
   })
 
   app.post('/allBooking', (req, res) => {
     const email = req.body.email;
-    adminCollection.find({email: email})
-    .toArray((err, admins) => {
-      if(admins.length > 0){
-        bookingCollection.find({})
-        .toArray((err, documents) => res.send(documents));
-      } else {
-        bookingCollection.find({email: email})
-        .toArray((err, documents) => res.send(documents));
-      }
-    })
+    adminCollection.find({ email: email })
+      .toArray((err, admins) => {
+        if (admins.length > 0) {
+          bookingCollection.find({})
+            .toArray((err, documents) => res.send(documents));
+        } else {
+          bookingCollection.find({ email: email })
+            .toArray((err, documents) => res.send(documents));
+        }
+      })
   })
 
   app.get('/services/:id', (req, res) => {
-    serviceCollection.findOne({ _id: ObjectId(req.params.id)})
-    .then(document => res.send(document));
+    serviceCollection.findOne({ _id: ObjectId(req.params.id) })
+      .then(document => res.send(document));
   })
 
   app.post('/addReview', (req, res) => {
     reviewCollection.insertOne(req.body)
-    .then(result => res.send(result.insertedCount > 0));
+      .then(result => res.send(result.insertedCount > 0));
   })
 
   app.get('/allReviews', (req, res) => {
     reviewCollection.find({})
-    .toArray((err, documents) => res.send(documents));
+      .toArray((err, documents) => res.send(documents));
   })
 
   app.post('/changeBookingStatus', (req, res) => {
     const status = req.body.status;
     const id = req.body.id;
     bookingCollection.updateOne(
-      {_id: ObjectId(id)},
-      { $set: {status: status}}
+      { _id: ObjectId(id) },
+      { $set: { status: status } }
     ).then(result => res.send(result.modifiedCount > 0))
   })
-  
+
+  app.delete('/deleteService/:id', (req, res) => {
+    const id = req.params.id;
+    serviceCollection.deleteOne({ _id: ObjectId(id) })
+      .then(result => res.send(result.deletedCount > 0));
+  })
+
+  app.patch('/updateService/:id', (req, res) => {
+    const id = req.params.id;
+    const { title, price, description } = req.body;
+    serviceCollection.updateOne(
+      { _id: ObjectId(id) },
+      {
+        $set: {
+          title,
+          price,
+          description,
+        }
+      }
+    ).then(result => res.send(result.modifiedCount > 0));
+  })
+
 });
 
 
-app.listen( process.env.PORT || port, () => {
+app.listen(process.env.PORT || port, () => {
   console.log(`NodeJS app listening at http://localhost:${port}`)
 });
