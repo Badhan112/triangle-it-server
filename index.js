@@ -82,6 +82,18 @@ client.connect((err) => {
             });
     });
 
+    app.get('/projects', (req, res) => {
+        projectCollection
+        .find({})
+        .toArray((err, document) => res.send(document));
+    })
+
+    app.get('/featured-projects', (req, res) => {
+        projectCollection
+        .find({ isFeatured: "true" })
+        .toArray((err, document) => res.send(document));
+    })
+
     app.post("/addAdmin", (req, res) => {
         const email = req.query.email;
         adminCollection.insertOne({ email }).then((result) => {
